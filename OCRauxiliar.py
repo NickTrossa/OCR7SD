@@ -41,11 +41,11 @@ def elegirCoord(fotoDif):
         cv2.setMouseCallback('fotoDif',dameCoordenadas)
         print("Seleccione:\n \
               1) Borde inferior izquierdo\n\
-              2) Borde superior derecho\n\
+              2) Borde superior izquierdo\n\
               3) Borde superior derdecho\n\
               4) Borde inferior derecho \n\
               5) Punto en borde de dígito (para saber separación entre dígitos)\n\
-              6) Punto en borde adyacente")
+              6) Punto en borde de dígito adyacente al anterior")
         while(len(coord) < (4+2)):
             cv2.imshow('fotoDif',fotoDif)
             if cv2.waitKey(20) & 0xFF == 27:
