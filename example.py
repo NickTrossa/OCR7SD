@@ -29,7 +29,7 @@ for n in range(14,16):
     res = np.append(res, res_posibles[:,-1])
     res2 = np.append(res, res_posibles[:,-1])
     con = np.append(con, (confianzas[:,-1]*100).astype("int32"))
-    print("Results: digits in rows")
+    print("Possible results: digits in rows, decreasing order")
     print(*res_posibles[:,-3:].transpose()[::-1], sep='\n')
     print("Confidence (distance to next option)")
     print(*((confianzas[:,-3:]*100).astype("int32")).transpose()[::-1], sep='\n')
