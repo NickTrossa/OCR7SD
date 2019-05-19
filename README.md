@@ -2,7 +2,7 @@
 ## Optical Character Recognition of Seven Segment Display (Python based)
 
 This is a command-line guided Python script to recognize the numbers in a seven segment digits display. Currently, there are two modes of operation:
-1. Load pictures.
+1. Load pictures from disk.
 2. Aquire pictures using webcam.
 
 OCRmain.py loads functions from OCRauxiliar.py and needs OpenCV module installed to run properly (appart from numpy and matplotlib). It displays the results in the prompt.
