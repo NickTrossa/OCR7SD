@@ -24,14 +24,15 @@ con = np.array([])
 
 #%%
 for n in range(14,16):
-    
     fotoDif = cv2.imread("./img/%i.png"%n, cv2.IMREAD_GRAYSCALE)
     res_posibles, confianzas = adquirirNumero(fotoDif, *setup, size=73)
-    res = np.append(res,res_posibles[:,-1])
-    res2 = np.append(res,res_posibles[:,-1])
-    con = np.append(con,(confianzas[:,-1]*100).astype("int32"))
-    print(res_posibles[:,-3:])
-    print((confianzas[:,-3:]*100).astype("int32"))
+    res = np.append(res, res_posibles[:,-1])
+    res2 = np.append(res, res_posibles[:,-1])
+    con = np.append(con, (confianzas[:,-1]*100).astype("int32"))
+    print("Results: digits in rows")
+    print(*res_posibles[:,-3:].transpose()[::-1], sep='\n')
+    print("Confidence (distance to next option)")
+    print(*((confianzas[:,-3:]*100).astype("int32")).transpose()[::-1], sep='\n')
     print("")
     
     cv2.destroyAllWindows()
