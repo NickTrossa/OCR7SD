@@ -5,6 +5,9 @@ Created on Sun Dec  9 20:59:02 2018
 @author: nicot
 
 Análisis de tanda de fotos.
+
+Acaso esto se agregó al master o al branch? Al branch. Pero ahora:
+    si mergeo se unifica con los cambios hechos al master?
 """
 #%%
 import matplotlib.pyplot as plt
