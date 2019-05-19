@@ -7,7 +7,7 @@ Created on Sun Dec  9 20:59:02 2018
 Análisis de tanda de fotos.
 
 Acaso esto se agregó al master o al branch? Al branch. Pero ahora:
-    si mergeo se unifica con los cambios hechos al master?
+    si mergeo se unifica con los cambios hechos al master? Sí. Esto es mágico.
 """
 #%%
 import matplotlib.pyplot as plt
