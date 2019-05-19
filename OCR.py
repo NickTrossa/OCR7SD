@@ -16,9 +16,8 @@ Tiene 4 funciones.
 
 import numpy as np
 import cv2
-from OCRauxiliar import convGris, mat2img, elegirCoord, setupROI, binarizar,\
-     CargarBaseReescalar, comparar, mostrarWebcam, cutROI, binarizarUnaImagen
-#     posibilidadesPorcentaje, suavizarImagen, fragmentDigitos, metodoSegmentos,
+
+import OCRauxiliar as ocraux
 
 def configImagen(img):
     """
@@ -27,19 +26,19 @@ def configImagen(img):
     """
     fotoDif = cv2.imread(img, cv2.IMREAD_GRAYSCALE)
     # Recortar región de interés
-    c_t = elegirCoord(fotoDif) # Coordenadas de referencia
+    c_t = ocraux.elegirCoord(fotoDif) # Coordenadas de referencia
     N = int(input("\n --> Inserte número de dígitos >> "))
     
     # Recortar ROI
-    imROI = cutROI(fotoDif, c_t)
+    imROI = ocraux.cutROI(fotoDif, c_t)
     #Binarizar
-    imROI_bin = binarizarUnaImagen(imROI, mostrar=True)
+    imROI_bin = ocraux.binarizarUnaImagen(imROI, mostrar=True)
     # Recortar y segmentar
-    digitos = setupROI(imROI_bin, N, c_t)
+    digitos = ocraux.setupROI(imROI_bin, N, c_t)
 #    # Binarización de prueba
 #    binarizar(digitos, mostrar=True)
     # Cargar base
-    num_base = CargarBaseReescalar("./img/numeros_base.png", digitos, mostrar=True)
+    num_base = ocraux.CargarBaseReescalar("./img/numeros_base.png", digitos, mostrar=True)
 
     return c_t, N, num_base
 
@@ -54,30 +53,30 @@ def configCamara(cap):
     print("[*] Objeto de cámara creado")
     # - - - - - - - - - - - - - - - - - - - - - - - -
     print("\n --> Montar display apagado...")
-    mostrarWebcam(cap)
+    ocraux.mostrarWebcam(cap)
     ret, fondo = cap.read()
-    imgApagado = convGris(fondo) #imagen float 32
+    imgApagado = ocraux.convGris(fondo) #imagen float 32
     print("Fondo capturado.")
     # - - - - - - - - - - - - - - - - - - - - - - - -
     print("\n --> Encender display y presionar 'q' para adquirir primera imagen...")
-    mostrarWebcam(cap)
+    ocraux.mostrarWebcam(cap)
     # Primeros pasos: eljo ROI y numero de digitos y cargo base
     ret, imagen = cap.read()
-    imgPrendido = convGris(imagen) #imagen float 32
+    imgPrendido = ocraux.convGris(imagen) #imagen float 32
     print("Foto con dígitos capturada.")
     
     #%% - - - - - - - - - - - - - - - - - - - - - - - -
     
-    fotoDif = mat2img(np.abs(imgApagado - imgPrendido)) #imagen uint8
+    fotoDif = ocraux.mat2img(np.abs(imgApagado - imgPrendido)) #imagen uint8
     # Recortar región de interés
-    c_t = elegirCoord(fotoDif) # Coordenadas de referencia
+    c_t = ocraux.elegirCoord(fotoDif) # Coordenadas de referencia
     N = int(input("\n --> Inserte número de dígitos >> "))
     # Recortar y segmentar
-    digitos = setupROI(fotoDif, N, c_t)
+    digitos = ocraux.setupROI(fotoDif, N, c_t)
     # Binarización de prueba
-    binarizar(digitos, mostrar=True)
+    ocraux.binarizar(digitos, mostrar=True)
     # Cargar base
-    num_base = CargarBaseReescalar("./img/numeros_base.png", digitos, mostrar=True)
+    num_base = ocraux.CargarBaseReescalar("./img/numeros_base.png", digitos, mostrar=True)
 
     return imgApagado, c_t, N, num_base
 
@@ -90,9 +89,9 @@ def adquirirImagen(cap, imgApagado):
         ret, imagen = cap.read()
     if not(ret):
         print("Error de adquisición...")
-    imgPrendido = convGris(imagen) # Out: imagen float 32
+    imgPrendido = ocraux.convGris(imagen) # Out: imagen float 32
     # Restarlas para marcar diferencias
-    fotoDif = mat2img(np.abs(imgApagado - imgPrendido)) # Out: imagen uint8
+    fotoDif = ocraux.mat2img(np.abs(imgApagado - imgPrendido)) # Out: imagen uint8
     return fotoDif
 
 def adquirirNumero(fotoDif, c_t, N, num_base, size):
@@ -100,11 +99,11 @@ def adquirirNumero(fotoDif, c_t, N, num_base, size):
     Función que devuelve los resultados de dígitos posibles de la imagen fotoDif.
     """
     # Tomo el ROI de la foto en base a configImagen: c_t, N y num_base
-    imROI = cutROI(fotoDif,c_t,mostrar=True)
+    imROI = ocraux.cutROI(fotoDif,c_t,mostrar=True)
     # Binarizo el ROI copmleto, con un método adaptativo
-    imROI_bin = binarizarUnaImagen(imROI, size=size, mostrar=True)
+    imROI_bin = ocraux.binarizarUnaImagen(imROI, size=size, mostrar=True)
     # Segmentación de dígitos
-    digitos_bin = setupROI(imROI_bin, N, c_t, mostrar=True)
+    digitos_bin = ocraux.setupROI(imROI_bin, N, c_t, mostrar=True)
 
-    res_posibles, confianzas = comparar(digitos_bin, num_base, mostrar=False)
+    res_posibles, confianzas = ocraux.comparar(digitos_bin, num_base, mostrar=False)
     return res_posibles, confianzas

@@ -13,13 +13,13 @@ Acaso esto se agregó al master o al branch? Al branch. Pero ahora:
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
-import time
-from OCR import configCamara, adquirirNumero, configImagen, adquirirImagen
+
+import OCR as ocr
 
 #%% MAIN BODY
 
 plt.close('all')
-setup = configImagen("./img/14.png")
+setup = ocr.configImagen("./img/14.png")
 
 res = np.array([])
 res2 = np.array([])
@@ -28,7 +28,7 @@ con = np.array([])
 #%%
 for n in range(14,16):
     fotoDif = cv2.imread("./img/%i.png"%n, cv2.IMREAD_GRAYSCALE)
-    res_posibles, confianzas = adquirirNumero(fotoDif, *setup, size=73)
+    res_posibles, confianzas = ocr.adquirirNumero(fotoDif, *setup, size=73)
     res = np.append(res, res_posibles[:,-1])
     res2 = np.append(res, res_posibles[:,-1])
     con = np.append(con, (confianzas[:,-1]*100).astype("int32"))

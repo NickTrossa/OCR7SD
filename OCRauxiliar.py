@@ -9,7 +9,6 @@ OCR Auxiliar
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
-import time
 
 def convGris(img):
     """
@@ -19,9 +18,11 @@ def convGris(img):
     gray = 0.299 * red + 0.587 * green + 0.114 * blue
     return gray
 
+
 def mat2img(mat):
     mat = mat.astype("float32")
     return (mat/mat.max()*255).astype("uint8")
+
 
 def elegirCoord(fotoDif):
     """
@@ -57,7 +58,8 @@ def elegirCoord(fotoDif):
         else:
             print("Probar seleccionando una región válida.")
     return coord
-#%%
+
+
 def cutROI(imagen,c_t,mostrar=True):
     rows,cols = imagen.shape
     ancho = abs(c_t[3][0]-c_t[0][0])
@@ -74,6 +76,7 @@ def cutROI(imagen,c_t,mostrar=True):
         plt.subplot(122),plt.imshow(output, cmap='Greys_r'),plt.title('Output')
         plt.show(), plt.waitforbuttonpress(), plt.close('all')
     return np.array(output, dtype='uint8')
+
 
 def setupROI(imagenROI, N, c_t, mostrar=True):
     """
@@ -99,7 +102,8 @@ def setupROI(imagenROI, N, c_t, mostrar=True):
             plt.imshow(digitos[i], cmap='Greys_r')
         plt.waitforbuttonpress()
     return np.array(digitos, dtype="uint8")
-#%%
+
+
 def binarizar(digitos, adaptive=False, size=151, C=0, mostrar=True):
     """
     Digitos es una matriz con los digitos (en indice 0).
@@ -126,7 +130,8 @@ def binarizar(digitos, adaptive=False, size=151, C=0, mostrar=True):
             plt.imshow(digitos_bin[i], cmap='Greys_r')
         plt.waitforbuttonpress()
     return np.array(digitos_bin, dtype="uint8")
-#%%
+
+
 def binarizarUnaImagen(imagen, adaptive=False, size=151, C=7, mostrar=True):
     """
     Digitos es una matriz con los digitos (en indice 0).
@@ -134,7 +139,6 @@ def binarizarUnaImagen(imagen, adaptive=False, size=151, C=7, mostrar=True):
     digitos_bin = []
     binarizada = cv2.adaptiveThreshold(imagen,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
                     cv2.THRESH_BINARY,size,C)
-
     if mostrar:
 #        N = len(digitos)
         N = 2
@@ -147,7 +151,8 @@ def binarizarUnaImagen(imagen, adaptive=False, size=151, C=7, mostrar=True):
         plt.imshow(binarizada, cmap='Greys_r')
         plt.waitforbuttonpress()
     return np.array(binarizada, dtype="uint8")
-#%%
+
+
 def suavizarImagen(digitos_bin, pix=4, mostrar=True):
     """
     img: uint8 o float32
@@ -189,6 +194,7 @@ def suavizarImagen(digitos_bin, pix=4, mostrar=True):
 #        cv2.destroyAllWindows()
     return np.array(digitos_bin_suav, dtype='uint8')
 
+
 def CargarBaseReescalar(file_base, digitos_bin, mostrar=True):
     # Cargar base 
     base = cv2.imread(file_base, cv2.IMREAD_GRAYSCALE)
@@ -213,7 +219,7 @@ def CargarBaseReescalar(file_base, digitos_bin, mostrar=True):
         plt.waitforbuttonpress()
     return np.array(num_base)
 
-#%% Comparo con la base de datos
+
 def comparar(digitos_bin, num_base, mostrar=True):
     """
     Devuelve 2 matrices:
@@ -245,10 +251,7 @@ def comparar(digitos_bin, num_base, mostrar=True):
     # Armo los pesos con las distancias al siguiente valor
     intervalos = (np.max(analisis, axis=1)-np.min(analisis, axis=1)).reshape(analisis.shape[0],1)
     confianzas = (ordenado[:,1:]-ordenado[:,:-1])*(1/intervalos)
-#    print(res_posibles[:,-1])
-#    print(np.round(confianzas[:,-1]*100,0))
-#    print(res_posibles[:,-2])
-#    print(np.round(confianzas[:,-2]*100,0))
+
     if mostrar:
         plt.figure(), plt.title("Coincidencias por dígito")
         i = 0
@@ -259,13 +262,11 @@ def comparar(digitos_bin, num_base, mostrar=True):
         plt.waitforbuttonpress(), plt.close('all')
     return res_posibles, confianzas
 
-#res_posibles, confianza = comparar(digitos_bin, num_base)
-#
-#print(res_posibles[:,-1],confianza[:,-1])
-#print(res_posibles[:,-2],confianza[:,-2])
 
-#%% Por fracción ocupada de negro
 def posibilidadesPorcentaje(digitos_bin, num_base):
+    """
+    Por fracción ocupada de negro
+    """
     def porcentajeSegmentos(digitos_bin):
         porcentajes = []
         for i in range(digitos_bin.shape[2]):
@@ -288,11 +289,12 @@ def posibilidadesPorcentaje(digitos_bin, num_base):
         posibles_tot.append(posibles)
     
     return posibles_tot
-    
-#print(posibilidadesPorcentaje(digitos_bin, num_base))
 
-#%% Sub fragmentacion de digito
+
 def fragmentDigitos(digito):
+    """
+    Sub fragmentacion de digito
+    """
     dx = int(digito.shape[1]/4) # Divisiones de ancho
     dy = int(digito.shape[0]/7) # Divisiones de altura
     
@@ -311,7 +313,7 @@ def fragmentDigitos(digito):
         porcentajes.append(round(fraccionBlanca*100))
     return porcentajes 
 
-#%%
+
 def metodoSegmentos(digitos):
     DIGITS_LOOKUP = [
         [1, 1, 1, 1, 1, 1, 0], # 0
@@ -352,10 +354,11 @@ def metodoSegmentos(digitos):
     
     return numeros, distancias_num
 
-#%% Cargar imagen de cámara web
 
-#cap = cv2.VideoCapture(0) # Objeto Video Capture
 def mostrarWebcam(cap):
+    """
+    Mostrar imagen de cámara web
+    """
     print("Mostrando imagen. Capturar con 'q'...")
     while(True):
         # Capture frame-by-frame
