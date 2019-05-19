@@ -5,6 +5,8 @@ Created on Sun Dec  9 20:59:02 2018
 @author: nicot
 
 Análisis de tanda de fotos.
+
+Acaso esto se agregó al master o al branch?
 """
 #%%
 import matplotlib.pyplot as plt
