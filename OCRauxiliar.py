@@ -37,7 +37,7 @@ def elegirCoord(fotoDif):
     tryAgain = True
     while tryAgain:
         coord = []
-        cv2.namedWindow('fotoDif', cv2.WINDOW_GUI_EXPANDED)
+        cv2.namedWindow('fotoDif', cv2.WINDOW_NORMAL)
         cv2.setMouseCallback('fotoDif',dameCoordenadas)
         print("Seleccione:\n \
               1) Borde inferior izquierdo\n\
@@ -57,8 +57,8 @@ def elegirCoord(fotoDif):
         else:
             print("Probar seleccionando una región válida.")
     return coord
-
-def setupROI(imagen, N, c_t, mostrar=True):
+#%%
+def cutROI(imagen,c_t,mostrar=True):
     rows,cols = imagen.shape
     ancho = abs(c_t[3][0]-c_t[0][0])
     alto = abs(c_t[0][1]-c_t[1][1])
@@ -67,6 +67,21 @@ def setupROI(imagen, N, c_t, mostrar=True):
     pts2 = np.float32([[0,alto],[0,0],[ancho,0],[ancho,alto]])
     M = cv2.getPerspectiveTransform(pts1,pts2)
     output = cv2.warpPerspective(imagen,M,(ancho,alto))
+
+    if mostrar:
+        plt.figure(1), plt.suptitle("Set up ROI")
+        plt.subplot(121),plt.imshow(imagen, cmap='Greys_r'),plt.title('Input')
+        plt.subplot(122),plt.imshow(output, cmap='Greys_r'),plt.title('Output')
+        plt.show(), plt.waitforbuttonpress(), plt.close('all')
+    return np.array(output, dtype='uint8')
+
+def setupROI(imagenROI, N, c_t, mostrar=True):
+    """
+    Ahora solo segmenta los digitos. Antes también agarraba el ROI
+        pero eso lo hace cutROI
+    """
+    output = imagenROI
+    ancho = imagenROI.shape[1]
     
     digitos = []
     # Espacio entre dígitos
@@ -77,37 +92,62 @@ def setupROI(imagen, N, c_t, mostrar=True):
         digitos.append(output[:,i*(dx+d):(i+1)*dx+i*d])
     
     if mostrar:
-        plt.figure(1)
-        plt.subplot(121),plt.imshow(imagen, cmap='Greys_r'),plt.title('Input')
-        plt.subplot(122),plt.imshow(output, cmap='Greys_r'),plt.title('Output')
-        plt.show(), plt.waitforbuttonpress(), plt.close('all')
-#        plt.figure(2)
-#        for i in range(N):
-#            plt.subplot(1,N,i+1), plt.imshow(digitos[i], cmap='Greys_r')
-#        plt.show(), plt.waitforbuttonpress(), plt.close('all')
+        fig_digitos, ax_digitos = plt.subplots(1,N)
+        fig_digitos.suptitle("Digitos segmentados.")
+        for i in range(N):
+            plt.subplot(1,N,i+1)
+            plt.imshow(digitos[i], cmap='Greys_r')
+        plt.waitforbuttonpress()
     return np.array(digitos, dtype="uint8")
-
-def binarizar(digitos, mostrar=True):
-#    N = digitos.shape[2]
-#    digitos_bin = np.zeros(digitos.shape, dtype='uint8')
+#%%
+def binarizar(digitos, adaptive=False, size=151, C=0, mostrar=True):
+    """
+    Digitos es una matriz con los digitos (en indice 0).
+    """
     digitos_bin = []
+    
+#    size = digitos.shape[1] + (digitos.shape[1]+1)%2
+#    print(size)
     for dig in digitos:
-#        dig = digitos[:,:,i]
-        digitos_bin.append(cv2.threshold(dig,int(np.mean(dig)),255,cv2.THRESH_BINARY_INV)[1])
-        #    digitos_bin.append(cv2.adaptiveThreshold(digitos[:,:,i],255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
-        #            cv2.THRESH_BINARY,25,2))
+        if adaptive:
+            digitos_bin.append(cv2.adaptiveThreshold(dig,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
+                    cv2.THRESH_BINARY,size,C))        
+        else:
+            digitos_bin.append(cv2.threshold(dig,int(np.mean(dig)),255,cv2.THRESH_BINARY)[1])
+
     if mostrar:
         N = len(digitos)
         fig_digitos, ax_digitos = plt.subplots(2,N)
         fig_digitos.suptitle("Digitos segmentados y binarización.")
         for i in range(N):
             plt.subplot(2,N,i+1)
-            plt.imshow(digitos[i], cmap='Greys')
+            plt.imshow(digitos[i], cmap='Greys_r')
             plt.subplot(2,N,N+i+1)
             plt.imshow(digitos_bin[i], cmap='Greys_r')
         plt.waitforbuttonpress()
     return np.array(digitos_bin, dtype="uint8")
+#%%
+def binarizarUnaImagen(imagen, adaptive=False, size=151, C=7, mostrar=True):
+    """
+    Digitos es una matriz con los digitos (en indice 0).
+    """
+    digitos_bin = []
+    binarizada = cv2.adaptiveThreshold(imagen,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
+                    cv2.THRESH_BINARY,size,C)
 
+    if mostrar:
+#        N = len(digitos)
+        N = 2
+        fig_digitos, ax_digitos = plt.subplots(1,2)
+        fig_digitos.suptitle("binarizarUnaImagen")
+        
+        plt.subplot(1,2,1)
+        plt.imshow(imagen, cmap='Greys_r')
+        plt.subplot(1,2,2)
+        plt.imshow(binarizada, cmap='Greys_r')
+        plt.waitforbuttonpress()
+    return np.array(binarizada, dtype="uint8")
+#%%
 def suavizarImagen(digitos_bin, pix=4, mostrar=True):
     """
     img: uint8 o float32
@@ -171,11 +211,18 @@ def CargarBaseReescalar(file_base, digitos_bin, mostrar=True):
             plt.imshow(num_base[i], cmap='Greys_r')
             plt.xticks([]), plt.yticks([])
         plt.waitforbuttonpress()
-    return np.array(num_base0), np.array(num_base)
+    return np.array(num_base)
 
 #%% Comparo con la base de datos
 def comparar(digitos_bin, num_base, mostrar=True):
-    resultado = []
+    """
+    Devuelve 2 matrices:
+        Filas: dígito a leer los pesos de coincidencia con cada dígito de menor a mayor.
+        Columnas: digitos de la base.
+        Valores res_posibles: pesos de cada comparación.
+        Valores confianzas: distancias relativas al siguiente valor posible.
+    """
+#    resultado = [] Este no sirve porque es inlexible, mejor analisis
     analisis = [] # Acá pongo cuánto coincide con cada dígito
     for n in range(len(digitos_bin)):
         pesos = []
@@ -186,7 +233,7 @@ def comparar(digitos_bin, num_base, mostrar=True):
                     if digitos_bin[n,i,j] == num_base[num,i,j]:
                         peso_i += 1
             pesos.append(peso_i)
-        resultado.append(pesos.index(max(pesos)))
+#        resultado.append(pesos.index(max(pesos)))
         analisis.append(pesos)
     
     # Cuantificacion
@@ -198,10 +245,10 @@ def comparar(digitos_bin, num_base, mostrar=True):
     # Armo los pesos con las distancias al siguiente valor
     intervalos = (np.max(analisis, axis=1)-np.min(analisis, axis=1)).reshape(analisis.shape[0],1)
     confianzas = (ordenado[:,1:]-ordenado[:,:-1])*(1/intervalos)
-    print(res_posibles[:,-1])
-    print(np.round(confianzas[:,-1]*100,0))
-    print(res_posibles[:,-2])
-    print(np.round(confianzas[:,-2]*100,0))
+#    print(res_posibles[:,-1])
+#    print(np.round(confianzas[:,-1]*100,0))
+#    print(res_posibles[:,-2])
+#    print(np.round(confianzas[:,-2]*100,0))
     if mostrar:
         plt.figure(), plt.title("Coincidencias por dígito")
         i = 0
