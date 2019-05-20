@@ -20,15 +20,14 @@ class BrightContr:
     """
     Esto binariza una imagen
     """
-    def __init__(self, file):
+    def __init__(self, image):
         """
         Acá esta la clave: on_trackbar es un método de la clase y por lo
         tanto tiene acceso a sus atributos (size y offset) sin necesidad
         de convertirlos en variables globales.
         """
         import numpy as np
-        self.file = file
-        self.imagen = cv2.imread(self.file, cv2.IMREAD_GRAYSCALE)
+        self.imagen = image
         self.alpha = 1
         self.beta = 0
         self.title_window = 'Ventana Brightness and Contrast'
@@ -42,6 +41,7 @@ class BrightContr:
         """
         Trackbar for size
         """
+        import numpy as np
         self.alpha = np.interp(val, [0,50,100], [0,1,10]) # Map to valid interval
         self.update()
 
@@ -49,6 +49,7 @@ class BrightContr:
         """
         Trackbar for offset
         """
+        import numpy as np
         self.beta = np.interp(val, [0,100], [-255,255])  # Map to valid interval
         self.update()
 
@@ -56,6 +57,7 @@ class BrightContr:
         """
         Esto updetea
         """
+        import numpy as np
         print("Alpha\t %i \t Beta \t %i \n"%(self.alpha, self.beta))
 #        new_image = np.zeros(self.imagen.shape, self.imagen.dtype)
         
@@ -63,8 +65,8 @@ class BrightContr:
 
         cv2.imshow(self.title_window, transformada.astype('uint8'))
 
-
-bc = BrightContr('1original.png')
+#foto = cv2.imread('./img/1original.png', cv2.IMREAD_GRAYSCALE)
+#bc = BrightContr(foto)
 
 # Show some stuff
 #b.update()
