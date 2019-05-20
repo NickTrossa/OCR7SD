@@ -19,18 +19,22 @@ import OCR as ocr
 #%% MAIN BODY
 
 plt.close('all')
+
+# Execute configuration part.
 setup = ocr.configImagen("./img/14.png")
 
+# A place to hold results 
 res = np.array([])
-res2 = np.array([])
 con = np.array([])
 
 #%%
 for n in range(14,16):
+    # Load images
     fotoDif = cv2.imread("./img/%i.png"%n, cv2.IMREAD_GRAYSCALE)
+    # Process the digits
     res_posibles, confianzas = ocr.adquirirNumero(fotoDif, *setup, size=73)
+    # Append results and show
     res = np.append(res, res_posibles[:,-1])
-    res2 = np.append(res, res_posibles[:,-1])
     con = np.append(con, (confianzas[:,-1]*100).astype("int32"))
     print("Possible results: digits in rows, decreasing order")
     print(*res_posibles[:,-3:].transpose()[::-1], sep='\n')
