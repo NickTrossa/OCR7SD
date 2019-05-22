@@ -12,6 +12,8 @@ Tiene 4 funciones.
 4) adquirirNumero
 --> 2 y 3 son para usar con camara web
 --> 1 y 4 se pueden usar con imagenes en el disco
+
+Para crear el paquete: https://packaging.python.org/tutorials/distributing-packages/
 """
 
 import numpy as np
