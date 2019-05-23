@@ -4,10 +4,8 @@ Created on Sun Dec  9 20:59:02 2018
 
 @author: nicot
 
-Análisis de tanda de fotos.
+Analysis of stored photos in ./img folder.
 
-Acaso esto se agregó al master o al branch? Al branch. Pero ahora:
-    si mergeo se unifica con los cambios hechos al master? Sí. Esto es mágico.
 """
 #%%
 import matplotlib.pyplot as plt
@@ -27,12 +25,15 @@ setup = ocr.configImagen("./img/14.png")
 res = np.array([])
 con = np.array([])
 
+# Set adaptive thresholding parameters
+setup.update({"winSize":73,"C":0})
 #%%
 for n in range(19,52):
     # Load images
     fotoDif = cv2.imread("./tanda1/%i.png"%n, cv2.IMREAD_GRAYSCALE)
     # Process the digits
-    res_posibles, confianzas = ocr.adquirirNumero(fotoDif, *setup, size=73, ver=False)
+    
+    res_posibles, confianzas = ocr.adquirirNumero(fotoDif, setup, ver=False)
     # Append results and show
     res = np.append(res, res_posibles[:,-1])
     con = np.append(con, (confianzas[:,-1]*100).astype("int32"))
@@ -45,5 +46,5 @@ for n in range(19,52):
     cv2.destroyAllWindows()
     plt.close('all')
 
-cv2.destroyAllWindows()
-plt.close('all')
+#cv2.destroyAllWindows()
+#plt.close('all')

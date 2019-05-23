@@ -58,7 +58,7 @@ class BrightContr:
         Esto updetea
         """
         import numpy as np
-        print("Alpha\t %i \t Beta \t %i \n"%(self.alpha, self.beta))
+#        print("Alpha\t %i \t Beta \t %i \n"%(self.alpha, self.beta))
 #        new_image = np.zeros(self.imagen.shape, self.imagen.dtype)
         
         transformada = np.clip(self.alpha*self.imagen.astype('float32') + self.beta, 0, 255)

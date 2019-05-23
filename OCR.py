@@ -28,7 +28,7 @@ def configImagen(img):
     fotoDif = cv2.imread(img, cv2.IMREAD_GRAYSCALE)
     # Recortar región de interés
     c_t = ocraux.elegirCoord(fotoDif) # Coordenadas de referencia
-    N = int(input("\n --> Inserte número de dígitos >> "))
+    N = int(input("\n --> Insert number of digits >> "))
     
     # Recortar ROI
     imROI = ocraux.cutROI(fotoDif, c_t)
@@ -47,8 +47,13 @@ def configImagen(img):
 #    binarizar(digitos, mostrar=True)
     # Cargar base
     num_base = ocraux.CargarBaseReescalar("./img/numeros_base.png", digitos, mostrar=True)
-
-    return c_t, N, num_base, alpha, beta
+    setup = {"c_t": c_t,
+            "N": N,
+            "num_base": num_base,
+            "alpha": alpha,
+            "beta": beta}
+    
+    return setup
 
 def configCamara(cap):
     """
@@ -102,21 +107,22 @@ def adquirirImagen(cap, imgApagado):
     fotoDif = ocraux.mat2img(np.abs(imgApagado - imgPrendido)) # Out: imagen uint8
     return fotoDif
 
-def adquirirNumero(fotoDif, c_t, N, num_base, alpha, beta, size, ver=False):
+def adquirirNumero(fotoDif, set_up, ver=False):
     """
     Función que devuelve los resultados de dígitos posibles de la imagen fotoDif.
+    sp es un diccionario con: c_t, N, num_base, alpha, beta, size
     """
     # Tomo el ROI de la foto en base a configImagen: c_t, N y num_base
-    imROI = ocraux.cutROI(fotoDif,c_t,mostrar=ver)
+    imROI = ocraux.cutROI(fotoDif, set_up["c_t"], mostrar=ver)
     
     # Ajusto brillo y contraste según setup
-    imROIbc = np.clip(alpha* imROI.astype('float32') + beta, 0, 255)
+    imROIbc = np.clip(set_up["alpha"]* imROI.astype('float32') + set_up["beta"], 0, 255)
     imROIbc = imROIbc.astype('uint8')
     
     # Binarizo el ROI copmleto, con un método adaptativo
-    imROI_bin = ocraux.binarizarUnaImagen(imROIbc, size=size, mostrar=ver)
+    imROI_bin = ocraux.binarizarUnaImagen(imROIbc, size=set_up["winSize"], C=set_up["C"], mostrar=ver)
     # Segmentación de dígitos
-    digitos_bin = ocraux.setupROI(imROI_bin, N, c_t, mostrar=ver)
+    digitos_bin = ocraux.setupROI(imROI_bin, set_up["N"], set_up["c_t"], mostrar=ver)
 
-    res_posibles, confianzas = ocraux.comparar(digitos_bin, num_base, mostrar=ver)
+    res_posibles, confianzas = ocraux.comparar(digitos_bin, set_up["num_base"], mostrar=ver)
     return res_posibles, confianzas
