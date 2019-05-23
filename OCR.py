@@ -20,6 +20,7 @@ import numpy as np
 import cv2
 
 import OCRauxiliar as ocraux
+import brightnessContrast as brco
 
 def configImagen(img):
     """
@@ -33,6 +34,13 @@ def configImagen(img):
     
     # Recortar ROI
     imROI = ocraux.cutROI(fotoDif, c_t)
+    
+    # Ajustar brillo y contraste
+    bc = brco.BrightContr(imROI)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
+    alpha, beta = bc.alpha, bc.beta
+
     #Binarizar
     imROI_bin = ocraux.binarizarUnaImagen(imROI, mostrar=True)
     # Recortar y segmentar
@@ -42,7 +50,7 @@ def configImagen(img):
     # Cargar base
     num_base = ocraux.CargarBaseReescalar("./img/numeros_base.png", digitos, mostrar=True)
 
-    return c_t, N, num_base
+    return c_t, N, num_base, alpha, beta
 
 def configCamara(cap):
     """
@@ -96,16 +104,21 @@ def adquirirImagen(cap, imgApagado):
     fotoDif = ocraux.mat2img(np.abs(imgApagado - imgPrendido)) # Out: imagen uint8
     return fotoDif
 
-def adquirirNumero(fotoDif, c_t, N, num_base, size):
+def adquirirNumero(fotoDif, c_t, N, num_base, alpha, beta, size, ver=False):
     """
     Función que devuelve los resultados de dígitos posibles de la imagen fotoDif.
     """
     # Tomo el ROI de la foto en base a configImagen: c_t, N y num_base
-    imROI = ocraux.cutROI(fotoDif,c_t,mostrar=True)
+    imROI = ocraux.cutROI(fotoDif,c_t,mostrar=ver)
+    
+    # Ajusto brillo y contraste según setup
+    imROIbc = np.clip(alpha* imROI.astype('float32') + beta, 0, 255)
+    imROIbc = imROIbc.astype('uint8')
+    
     # Binarizo el ROI copmleto, con un método adaptativo
-    imROI_bin = ocraux.binarizarUnaImagen(imROI, size=size, mostrar=True)
+    imROI_bin = ocraux.binarizarUnaImagen(imROIbc, size=size, mostrar=ver)
     # Segmentación de dígitos
-    digitos_bin = ocraux.setupROI(imROI_bin, N, c_t, mostrar=True)
+    digitos_bin = ocraux.setupROI(imROI_bin, N, c_t, mostrar=ver)
 
-    res_posibles, confianzas = ocraux.comparar(digitos_bin, num_base, mostrar=False)
+    res_posibles, confianzas = ocraux.comparar(digitos_bin, num_base, mostrar=ver)
     return res_posibles, confianzas
