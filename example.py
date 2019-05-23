@@ -8,7 +8,7 @@ Analysis of stored photos in ./img folder.
 
 Pending:
     Short-term:
-        Add adaptive Threshold config after brightness and contrast
+        - Add adaptive Threshold config after brightness and contrast - DONE
         Improve possible results plot.
         create a function for the case of mostrar=True in OCRauxiliar
     Medium-term:
@@ -38,14 +38,14 @@ res = np.array([])
 con = np.array([])
 
 # Set adaptive thresholding parameters
-setup.update({"winSize":73,"C":0})
+#setup.update({"size":201,"offset":0})
 #%%
-for n in range(19,52):
+for n in range(19,22):
     # Load images
     fotoDif = cv2.imread("./tanda1/%i.png"%n, cv2.IMREAD_GRAYSCALE)
     # Process the digits
     
-    res_posibles, confianzas = ocr.adquirirNumero(fotoDif, setup, ver=False)
+    res_posibles, confianzas = ocr.adquirirNumero(fotoDif, setup, ver=True)
     # Append results and show
     res = np.append(res, res_posibles[:,-1])
     con = np.append(con, (confianzas[:,-1]*100).astype("int32"))

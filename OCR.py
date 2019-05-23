@@ -19,6 +19,7 @@ import cv2
 
 import OCRauxiliar as ocraux
 import brightnessContrast as brco
+import binarization as bi
 
 def configImagen(img):
     """
@@ -39,10 +40,14 @@ def configImagen(img):
     cv2.destroyAllWindows()
     alpha, beta = bc.alpha, bc.beta
 
-    #Binarizar
-    imROI_bin = ocraux.binarizarUnaImagen(imROI, mostrar=True)
+#     Adjust binarization parameters
+    binar = bi.Binarizador(bc.transformada)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
+    size, offset = binar.size, binar.offset
+    
     # Recortar y segmentar
-    digitos = ocraux.setupROI(imROI_bin, N, c_t)
+    digitos = ocraux.setupROI(bc.transformada, N, c_t)
 #    # Binarización de prueba
 #    binarizar(digitos, mostrar=True)
     # Cargar base
@@ -51,8 +56,9 @@ def configImagen(img):
             "N": N,
             "num_base": num_base,
             "alpha": alpha,
-            "beta": beta}
-    
+            "beta": beta,
+            "size": size,
+            "offset": offset}
     return setup
 
 def configCamara(cap):
@@ -120,7 +126,7 @@ def adquirirNumero(fotoDif, set_up, ver=False):
     imROIbc = imROIbc.astype('uint8')
     
     # Binarizo el ROI copmleto, con un método adaptativo
-    imROI_bin = ocraux.binarizarUnaImagen(imROIbc, size=set_up["winSize"], C=set_up["C"], mostrar=ver)
+    imROI_bin = ocraux.binarizarUnaImagen(imROIbc, size=set_up["size"], C=set_up["offset"], mostrar=ver)
     # Segmentación de dígitos
     digitos_bin = ocraux.setupROI(imROI_bin, set_up["N"], set_up["c_t"], mostrar=ver)
 

@@ -28,6 +28,7 @@ class BrightContr:
         """
         import numpy as np
         self.imagen = image
+        self.transformada = image
         self.alpha = 1
         self.beta = 0
         self.title_window = 'Ventana Brightness and Contrast'
@@ -61,9 +62,9 @@ class BrightContr:
 #        print("Alpha\t %i \t Beta \t %i \n"%(self.alpha, self.beta))
 #        new_image = np.zeros(self.imagen.shape, self.imagen.dtype)
         
-        transformada = np.clip(self.alpha*self.imagen.astype('float32') + self.beta, 0, 255)
+        self.transformada = np.clip(self.alpha*self.imagen.astype('float32') + self.beta, 0, 255).astype('uint8')
 
-        cv2.imshow(self.title_window, transformada.astype('uint8'))
+        cv2.imshow(self.title_window, self.transformada)
 
 #foto = cv2.imread('./img/1original.png', cv2.IMREAD_GRAYSCALE)
 #bc = BrightContr(foto)
