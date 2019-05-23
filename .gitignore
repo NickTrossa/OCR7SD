@@ -1,2 +1,6 @@
 
 *.pyc
+__pycache__/OCRauxiliar.cpython-36.pyc
+tanda1/*
+*.pyc
+__pycache__/OCR.cpython-36.pyc

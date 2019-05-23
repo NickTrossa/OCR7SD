@@ -136,7 +136,6 @@ def binarizarUnaImagen(imagen, adaptive=False, size=151, C=7, mostrar=True):
     """
     Digitos es una matriz con los digitos (en indice 0).
     """
-    digitos_bin = []
     binarizada = cv2.adaptiveThreshold(imagen,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
                     cv2.THRESH_BINARY,size,C)
     if mostrar:
